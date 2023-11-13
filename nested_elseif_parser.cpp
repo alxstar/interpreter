@@ -15,6 +15,7 @@ public:
 	virtual void PopFront(){}
 	virtual Base* Parent()=0;
 	virtual bool IsEmpty() const {return true;}
+	virtual Base* Front(){return nullptr;}
 };
 
 class D1: public Base
@@ -67,6 +68,11 @@ public:
 		return v_.front()->GetCommand();
 	}
 
+	virtual Base* Front()
+	{
+		return v_.empty() ? nullptr : v_.front().get();
+	}
+
 	virtual void PopFront()
 	{
 		v_.pop_front();
@@ -92,21 +98,19 @@ class C
 public:	
 	explicit C(const std::vector<std::string>& v)
 	{
+		root_ = std::make_unique<D2>("root");
 		Parse(v);
 	}
 	
 	void Print()
 	{
-		std::cout << "C::PRINT, SIZE: " << v_.size() << '\n';
-		for(auto& elem: v_)
-		{
-			elem->Print();
-		}
+		root_->Print();
 	}
 
 	D1* GetCommand()
 	{
-		auto* command = dynamic_cast<D1*>(v_.front()->GetCommand());
+		auto* command = dynamic_cast<D1*>(root_->Front()->GetCommand());
+		
 		if(!command)
 			return nullptr;
 
@@ -116,12 +120,12 @@ public:
 
 	bool Next(bool result)
 	{
-		if(v_.empty()) 
+		if(root_->IsEmpty()) 
 			return false;
 
-		if(dynamic_cast<D1*>(v_.front().get()))
+		if(dynamic_cast<D1*>(root_->Front()))
 		{
-			v_.pop_front();
+			root_->PopFront();
 			last_command_ = nullptr;
 			return true;
 		}
@@ -199,7 +203,7 @@ private:
 		branches_.pop();
 		if(branches_.empty())
 		{
-			v_.push_back(std::move(ended_if_or_elseif_branch));
+			root_->Push(std::move(ended_if_or_elseif_branch));
 		}
 		else
 		{	
@@ -208,7 +212,7 @@ private:
 			from_if_to_endif_struct->Push(std::move(ended_if_or_elseif_branch));
 			if(branches_.empty())
 			{
-				v_.push_back(std::move(from_if_to_endif_struct));
+				root_->Push(std::move(from_if_to_endif_struct));
 			}
 			else
 				branches_.top()->Push(std::move(from_if_to_endif_struct));
@@ -225,7 +229,7 @@ private:
 		else
 		{
 			std::unique_ptr<Base> instruction = std::make_unique<D1>(line);
-			v_.push_back(std::move(instruction));
+			root_->Push(std::move(instruction));
 		}
 	}
 	
@@ -260,7 +264,8 @@ private:
 	}
 
 private:				
-	std::list<std::unique_ptr<Base>> v_;
+	//std::list<std::unique_ptr<Base>> v_;
+	std::unique_ptr<Base> root_ = nullptr;
 	std::stack<std::unique_ptr<Base>> branches_;
 	D1* last_command_ = nullptr;
 };
