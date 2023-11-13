@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <iostream>
 
 class Base
@@ -30,10 +31,10 @@ public:
 	
 	virtual ~D1(){}
 	virtual void Print(){std::cout << "\t\tD1::PRINT, " << name_ << '\n';}
-	virtual Base* GetCommand(){std::cout << "D1::GETCOMMAND\n"; return this;}
+	virtual Base* GetCommand(){/*std::cout << "D1::GETCOMMAND\n";*/ return this;}
 	virtual Base* Parent(){return parent_;}
 	bool IsCondition() const {return is_condition_;}
-
+	std::string Name() const {return name_;}
 	virtual void SetParent(Base* parent){parent_ = parent;}
 
 private:	
@@ -52,11 +53,11 @@ public:
 	
 	virtual ~D2(){}
 	virtual void Print(){
-		std::cout << "D2::PRINT BEGIN, " << name_ << "\n";
+		//std::cout << "D2::PRINT BEGIN, " << name_ << "\n";
 		for(auto& u: v_){
 			u->Print();
 		}
-		std::cout << "D2::PRINT END, " << name_ << "\n";
+		//std::cout << "D2::PRINT END, " << name_ << "\n";
 	}
 	
 	virtual void Push(std::unique_ptr<Base>&& u)
@@ -67,7 +68,7 @@ public:
 	
 	virtual Base* GetCommand()
 	{
-		std::cout << name_ << ", SIZE: " << v_.size() << ", D2::GETCOMMAND\n";
+		//std::cout << name_ << ", SIZE: " << v_.size() << ", D2::GETCOMMAND\n";
 		return v_.front()->GetCommand();
 	}
 
@@ -78,14 +79,14 @@ public:
 
 	virtual void PopFront()
 	{
-		std::cout << name_ << ", D2::POPFRONT, " << "размер до pop_front: " << v_.size() << "\n";
+		//std::cout << name_ << ", D2::POPFRONT, " << "размер до pop_front: " << v_.size() << "\n";
 		v_.pop_front();
-		std::cout << name_ << ", D2::POPFRONT, " << "размер после pop_front: " << v_.size() << "\n";
+		//std::cout << name_ << ", D2::POPFRONT, " << "размер после pop_front: " << v_.size() << "\n";
 		if(v_.empty())
 		{
 			if(parent_)
 			{
-				std::cout << "if(parent_) parent_->PopFront()\n";
+				//std::cout << "if(parent_) parent_->PopFront()\n";
 				parent_->PopFront();
 			}
 		}
@@ -336,19 +337,76 @@ int main()
 			"a1",
 			"a2",
 			"a3",
+		"elseif aa",
+			"aa1",
+			"aa2",
+			"aa3",
 		"endif",
 		"b1"
 	};
 
+	std::vector<std::string> v_{
+		"if a",
+			"if b",
+				"if c",
+					"if d",
+						"d1",
+						"d2",
+						"d3",
+					"elseif dd",
+						    "dd1",
+							"dd2",
+							"dd3",
+					"endif",
+				"endif",
+			"endif",
+		"endif"
 
-	C c(v2);
+	};
+
+	std::unordered_map<std::string, bool> m{
+		{"a",  true},
+		{"a1", true},
+		{"a2", true},
+		{"a3", true},
+		{"b",  true},
+		{"b1", true},
+		{"b2", true},
+		{"b3", true},
+		{"c",  true},
+		{"c1", true},
+		{"c2", true},
+		{"c3", true},
+		{"d",  true},
+		{"d1", true},
+		{"d2", true},
+		{"d3", true},
+		{"aa",  true},
+		{"aa1", true},
+		{"aa2", true},
+		{"aa3", true},
+		{"bb",  true},
+		{"bb1", true},
+		{"bb2", true},
+		{"bb3", true},
+		{"cc",  true},
+		{"cc1", true},
+		{"cc2", true},
+		{"cc3", true},
+		{"dd",  true},
+		{"dd1", true},
+		{"dd2", true},
+		{"dd3", true}
+	};
+	//C c(v2);
 	//c.Print();
 	//C c(v3);
+	C c(v_);
 	while(!c.AtEnd())
 	{
 		D1* command = c.GetCommand();
-		command->Print();
-		c.Next(true);
+		std::cout << "NAME: " << command->Name() << '\n';
+		c.Next(m[command->Name()]);
 	}	
 }
 
