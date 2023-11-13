@@ -12,24 +12,40 @@ public:
 	virtual void Print()=0;
 	virtual void Push(std::unique_ptr<Base>&& u){}
 	virtual Base* GetCommand()=0;
+	virtual void PopFront(){}
+	virtual Base* Parent()=0;
+	virtual bool IsEmpty() const {return true;}
 };
 
 class D1: public Base
 {
 public:
-	explicit D1(const std::string& name): name_(name){} 
+	explicit D1(const std::string& name, Base* parent=nullptr, bool is_condition=false): 
+		name_(name),
+		parent_(parent),
+		is_condition_(is_condition)
+	{} 
+	
 	virtual ~D1(){}
 	virtual void Print(){std::cout << "\t\tD1::PRINT, " << name_ << '\n';}
 	virtual Base* GetCommand(){std::cout << "D1::GETCOMMAND\n"; return this;}
+	virtual Base* Parent(){return parent_;}
+	bool IsCondition() const {return is_condition_;}
 
 private:
 	std::string name_;
+	Base* parent_;
+	bool is_condition_;
 };
 
 class D2: public Base
 {
 public:
-	explicit D2(const std::string& name): name_(name){}
+	explicit D2(const std::string& name, Base* parent=nullptr): 
+		name_(name),
+		parent_(parent)
+	{}
+	
 	virtual ~D2(){}
 	virtual void Print(){
 		std::cout << "D2::PRINT BEGIN, " << name_ << "\n";
@@ -51,36 +67,23 @@ public:
 		return v_.front()->GetCommand();
 	}
 
+	virtual void PopFront()
+	{
+		v_.pop_front();
+		if(v_.empty())
+		{
+			if(parent_)
+				parent_->PopFront();
+		}
+	}
+
+	virtual Base* Parent(){return parent_;}
+	bool IsEmpty() const { return v_.empty();}
+
 private:
 	std::list<std::unique_ptr<Base>> v_;
 	std::string name_;
-};
-
-class D2_: public Base
-{
-public:
-	explicit D2_(const std::string& name): name_(name)
-	{
-		//std::cout << "D2_(" << name_ << ")\n";
-	}
-	virtual ~D2_(){}
-	virtual void Print()
-	{
-		std::cout << "D2_::PRINT, " << name_ << ", SIZE: " << l_.size() << '\n';
-		for(auto& u: l_)
-		{
-			u->Print();
-		}
-	}
-	virtual void Push(std::unique_ptr<Base>&& u)
-	{
-		//std::cout << "D2_ " << name_ << "::PUSH\n";
-		l_.push_back(std::move(u));
-	}
-
-private:
-	std::list<std::unique_ptr<Base>> l_;
-	std::string name_;
+	Base* parent_;
 };
 
 
@@ -91,6 +94,7 @@ public:
 	{
 		Parse(v);
 	}
+	
 	void Print()
 	{
 		std::cout << "C::PRINT, SIZE: " << v_.size() << '\n';
@@ -103,24 +107,72 @@ public:
 	D1* GetCommand()
 	{
 		auto* command = dynamic_cast<D1*>(v_.front()->GetCommand());
-		return command ? command : nullptr;
+		if(!command)
+			return nullptr;
+
+		last_command_ = command;
+		return command;
 	}	
 
-	void Next()
+	bool Next(bool result)
 	{
-		
+		if(v_.empty()) 
+			return false;
+
+		if(dynamic_cast<D1*>(v_.front().get()))
+		{
+			v_.pop_front();
+			last_command_ = nullptr;
+			return true;
+		}
+	
+		if(!last_command_)
+			return false;
+
+		bool is_condition = last_command_->IsCondition();
+		return MoveNext(is_condition, result);
 	}
 
-
 private:	
+	
+	bool MoveNext(bool is_condition, bool result)
+	{
+		if(is_condition)
+		{
+			if(result)
+			{
+				last_command_->Parent()->PopFront();
+			}
+			else
+			{
+				last_command_->Parent()->Parent()->PopFront();
+			}
+		}
+		else
+		{
+			if(result)
+			{
+				last_command_->Parent()->PopFront();
+			}
+			else
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	void HandleIf(const std::string& line)
 	{
 		auto if_pos = line.find("if ");
 		std::string name = line.substr(if_pos + 3);
+		
 		std::unique_ptr<Base> new_from_if_to_endif_struct = std::make_unique<D2>(name);
 		branches_.push(std::move(new_from_if_to_endif_struct));
 				
 		std::unique_ptr<Base> new_if_branch = std::make_unique<D2>(name);	
+		std::unique_ptr<Base> if_condition = std::make_unique<D1>(name, new_if_branch.get(), true);
+		new_if_branch->Push(std::move(if_condition));
 		branches_.push(std::move(new_if_branch));
 	}
 	
@@ -136,6 +188,8 @@ private:
 		}	
 				
 		std::unique_ptr<Base> new_elseif_branch = std::make_unique<D2>(name);		  
+		std::unique_ptr<Base> elseif_condition = std::make_unique<D1>(name, new_elseif_branch.get(), true);
+		new_elseif_branch->Push(std::move(elseif_condition));
 		branches_.push(std::move(new_elseif_branch));
 	}
 	
@@ -163,13 +217,14 @@ private:
 	
 	void HandleInstruction(const std::string& line)
 	{
-		std::unique_ptr<Base> instruction = std::make_unique<D1>(line);
 		if(!branches_.empty())
 		{
+			std::unique_ptr<Base> instruction = std::make_unique<D1>(line, branches_.top().get());
 			branches_.top()->Push(std::move(instruction));
 		}
 		else
 		{
+			std::unique_ptr<Base> instruction = std::make_unique<D1>(line);
 			v_.push_back(std::move(instruction));
 		}
 	}
@@ -207,6 +262,7 @@ private:
 private:				
 	std::list<std::unique_ptr<Base>> v_;
 	std::stack<std::unique_ptr<Base>> branches_;
+	D1* last_command_ = nullptr;
 };
 
 int main()
