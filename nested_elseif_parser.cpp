@@ -17,14 +17,14 @@ public:
 	virtual bool IsEmpty() const {return true;}
 	virtual Base* Front(){return nullptr;}
 	virtual std::size_t Size() const {return 0;}
+	virtual void SetParent(Base* parent)=0;
 };
 
 class D1: public Base
 {
 public:
-	explicit D1(const std::string& name, Base* parent=nullptr, bool is_condition=false): 
+	explicit D1(const std::string& name, bool is_condition=false): 
 		name_(name),
-		parent_(parent),
 		is_condition_(is_condition)
 	{} 
 	
@@ -34,20 +34,20 @@ public:
 	virtual Base* Parent(){return parent_;}
 	bool IsCondition() const {return is_condition_;}
 
-private:
+	virtual void SetParent(Base* parent){parent_ = parent;}
+
+private:	
 	std::string name_;
-	Base* parent_;
+	Base* parent_ = nullptr;
 	bool is_condition_;
 };
 
 class D2: public Base
 {
 public:
-	explicit D2(const std::string& name, Base* parent=nullptr): 
-		name_(name),
-		parent_(parent)
+	explicit D2(const std::string& name): 
+		name_(name)
 	{
-		std::cout << "D2 CONSTRUCTOR, NAME: " << name_ << ", PARENT: " << parent << '\n';
 	}
 	
 	virtual ~D2(){}
@@ -61,7 +61,7 @@ public:
 	
 	virtual void Push(std::unique_ptr<Base>&& u)
 	{
-		std::cout << "D2 " << name_ << "::PUSH\n";
+		u->SetParent(this);
 		v_.push_back(std::move(u));
 	}
 	
@@ -83,22 +83,25 @@ public:
 		std::cout << name_ << ", D2::POPFRONT, " << "размер после pop_front: " << v_.size() << "\n";
 		if(v_.empty())
 		{
-			std::cout << "if(v_.empty()), parent: " << parent_ << "\n";
 			if(parent_)
+			{
+				std::cout << "if(parent_) parent_->PopFront()\n";
 				parent_->PopFront();
+			}
 		}
 	}
 
 	virtual Base* Parent(){return parent_;}
 	bool IsEmpty() const { return v_.empty();}
-	virtual std::size_t Size() const {std::cout << name_ << " D2::SIZE, " << v_.size() << '\n';return v_.size();}
+	virtual std::size_t Size() const {return v_.size();}
+
+	virtual void SetParent(Base* parent){parent_ = parent;}
 
 private:
 	std::list<std::unique_ptr<Base>> v_;
 	std::string name_;
-	Base* parent_;
+	Base* parent_ = nullptr;
 };
-
 
 class C
 {
@@ -167,7 +170,10 @@ private:
 		{
 			if(result)
 			{
-				last_command_->Parent()->PopFront();
+				if(last_command_->Parent()->Size()==1)
+					 last_command_->Parent()->Parent()->Parent()->PopFront();
+				else
+					last_command_->Parent()->PopFront();
 			}
 			else
 			{
@@ -186,7 +192,7 @@ private:
 		branches_.push(std::move(new_from_if_to_endif_struct));
 				
 		std::unique_ptr<Base> new_if_branch = std::make_unique<D2>(name);	
-		std::unique_ptr<Base> if_condition = std::make_unique<D1>(name, new_if_branch.get(), true);
+		std::unique_ptr<Base> if_condition = std::make_unique<D1>(name, true);
 		new_if_branch->Push(std::move(if_condition));
 		branches_.push(std::move(new_if_branch));
 	}
@@ -203,7 +209,7 @@ private:
 		}	
 				
 		std::unique_ptr<Base> new_elseif_branch = std::make_unique<D2>(name);		  
-		std::unique_ptr<Base> elseif_condition = std::make_unique<D1>(name, new_elseif_branch.get(), true);
+		std::unique_ptr<Base> elseif_condition = std::make_unique<D1>(name, true);
 		new_elseif_branch->Push(std::move(elseif_condition));
 		branches_.push(std::move(new_elseif_branch));
 	}
@@ -234,7 +240,7 @@ private:
 	{
 		if(!branches_.empty())
 		{
-			std::unique_ptr<Base> instruction = std::make_unique<D1>(line, branches_.top().get());
+			std::unique_ptr<Base> instruction = std::make_unique<D1>(line);
 			branches_.top()->Push(std::move(instruction));
 		}
 		else
@@ -325,9 +331,19 @@ int main()
 		"endif"
 	};	
 	
-	
+	std::vector<std::string> v3{
+		"if a",
+			"a1",
+			"a2",
+			"a3",
+		"endif",
+		"b1"
+	};
+
+
 	C c(v2);
-	c.Print();
+	//c.Print();
+	//C c(v3);
 	while(!c.AtEnd())
 	{
 		D1* command = c.GetCommand();
