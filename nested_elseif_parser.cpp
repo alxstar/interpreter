@@ -16,6 +16,7 @@ public:
 	virtual Base* Parent()=0;
 	virtual bool IsEmpty() const {return true;}
 	virtual Base* Front(){return nullptr;}
+	virtual std::size_t Size() const {return 0;}
 };
 
 class D1: public Base
@@ -45,7 +46,9 @@ public:
 	explicit D2(const std::string& name, Base* parent=nullptr): 
 		name_(name),
 		parent_(parent)
-	{}
+	{
+		std::cout << "D2 CONSTRUCTOR, NAME: " << name_ << ", PARENT: " << parent << '\n';
+	}
 	
 	virtual ~D2(){}
 	virtual void Print(){
@@ -58,13 +61,13 @@ public:
 	
 	virtual void Push(std::unique_ptr<Base>&& u)
 	{
-		//std::cout << "D2 " << name_ << "::PUSH\n";
+		std::cout << "D2 " << name_ << "::PUSH\n";
 		v_.push_back(std::move(u));
 	}
 	
 	virtual Base* GetCommand()
 	{
-		std::cout << "D2::GETCOMMAND\n";
+		std::cout << name_ << ", SIZE: " << v_.size() << ", D2::GETCOMMAND\n";
 		return v_.front()->GetCommand();
 	}
 
@@ -75,9 +78,12 @@ public:
 
 	virtual void PopFront()
 	{
+		std::cout << name_ << ", D2::POPFRONT, " << "размер до pop_front: " << v_.size() << "\n";
 		v_.pop_front();
+		std::cout << name_ << ", D2::POPFRONT, " << "размер после pop_front: " << v_.size() << "\n";
 		if(v_.empty())
 		{
+			std::cout << "if(v_.empty()), parent: " << parent_ << "\n";
 			if(parent_)
 				parent_->PopFront();
 		}
@@ -85,6 +91,7 @@ public:
 
 	virtual Base* Parent(){return parent_;}
 	bool IsEmpty() const { return v_.empty();}
+	virtual std::size_t Size() const {std::cout << name_ << " D2::SIZE, " << v_.size() << '\n';return v_.size();}
 
 private:
 	std::list<std::unique_ptr<Base>> v_;
@@ -106,6 +113,8 @@ public:
 	{
 		root_->Print();
 	}
+	
+	std::size_t Size() const {return root_->Size();}
 
 	D1* GetCommand()
 	{
@@ -136,11 +145,13 @@ public:
 		bool is_condition = last_command_->IsCondition();
 		return MoveNext(is_condition, result);
 	}
+	bool AtEnd() const {return root_->IsEmpty();}
 
 private:	
 	
 	bool MoveNext(bool is_condition, bool result)
 	{
+		std::cout << "MOVENEXT(" << std::boolalpha << is_condition << ", " << result << ")\n";
 		if(is_condition)
 		{
 			if(result)
@@ -171,7 +182,7 @@ private:
 		auto if_pos = line.find("if ");
 		std::string name = line.substr(if_pos + 3);
 		
-		std::unique_ptr<Base> new_from_if_to_endif_struct = std::make_unique<D2>(name);
+		std::unique_ptr<Base> new_from_if_to_endif_struct = std::make_unique<D2>(std::string("starting with: ") + name);
 		branches_.push(std::move(new_from_if_to_endif_struct));
 				
 		std::unique_ptr<Base> new_if_branch = std::make_unique<D2>(name);	
@@ -317,9 +328,11 @@ int main()
 	
 	C c(v2);
 	c.Print();
-		{
-			D1* d1 = c.GetCommand(); 
-			d1->Print();
-		}
+	while(!c.AtEnd())
+	{
+		D1* command = c.GetCommand();
+		command->Print();
+		c.Next(true);
+	}	
 }
 
