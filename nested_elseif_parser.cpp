@@ -1,9 +1,9 @@
+#include "testing.h"
+
 #include <stack>
 #include <list>
-#include <vector>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <iostream>
 
 class Base
@@ -149,6 +149,7 @@ public:
 		bool is_condition = last_command_->IsCondition();
 		return MoveNext(is_condition, result);
 	}
+	
 	bool AtEnd() const {return root_->IsEmpty();}
 
 private:	
@@ -288,125 +289,52 @@ private:
 	D1* last_command_ = nullptr;
 };
 
-int main()
+
+void test(const std::vector<std::string>& v)
 {
-	std::vector<std::string> v{
-		//"keyright",
-		"if a", 
-			"a1", 
-			"a2", 
-			"a3", 
-			"if b", 
-				"b1", 
-				"b2", 
-				"b3", 
-				"if c", 
-					"c1", 
-					"c2", 
-					"c3", 
-				"endif", 
-			"endif", 
-		"endif"
-	};	
-	
-	std::vector<std::string> v2{
-		//"keyright",
-		"if a", 
-			"a1", 
-			"a2", 
-			"a3", 
-			"if b", 
-				"b1", 
-				"b2", 
-				"b3", 
-			"elseif bbb",
-					 "bbb1",
-				 	 "bbb2",
-					 "bbb3",
-			"endif",	 
-				"if c", 
-					"c1", 
-					"c2", 
-					"c3", 
-				"endif", 
-		"endif"
-	};	
-	
-	std::vector<std::string> v3{
-		"if a",
-			"a1",
-			"a2",
-			"a3",
-		"elseif aa",
-			"aa1",
-			"aa2",
-			"aa3",
-		"endif",
-		"b1"
-	};
-
-	std::vector<std::string> v_{
-		"if a",
-			"if b",
-				"if c",
-					"if d",
-						"d1",
-						"d2",
-						"d3",
-					"elseif dd",
-						    "dd1",
-							"dd2",
-							"dd3",
-					"endif",
-				"endif",
-			"endif",
-		"endif"
-
-	};
-
-	std::unordered_map<std::string, bool> m{
-		{"a",  true},
-		{"a1", true},
-		{"a2", true},
-		{"a3", true},
-		{"b",  true},
-		{"b1", true},
-		{"b2", true},
-		{"b3", true},
-		{"c",  true},
-		{"c1", true},
-		{"c2", true},
-		{"c3", true},
-		{"d",  true},
-		{"d1", true},
-		{"d2", true},
-		{"d3", true},
-		{"aa",  true},
-		{"aa1", true},
-		{"aa2", true},
-		{"aa3", true},
-		{"bb",  true},
-		{"bb1", true},
-		{"bb2", true},
-		{"bb3", true},
-		{"cc",  true},
-		{"cc1", true},
-		{"cc2", true},
-		{"cc3", true},
-		{"dd",  true},
-		{"dd1", true},
-		{"dd2", true},
-		{"dd3", true}
-	};
-	//C c(v2);
-	//c.Print();
-	//C c(v3);
-	C c(v_);
+	std::unordered_map<std::string, bool> m_2(m);
+	C c(v);
 	while(!c.AtEnd())
 	{
 		D1* command = c.GetCommand();
 		std::cout << "NAME: " << command->Name() << '\n';
-		c.Next(m[command->Name()]);
+		bool result = m_2[command->Name()]; 
+		c.Next(result);
 	}	
+}
+
+int main()
+{
+	test(v1);
+	test(v2);
+	test(v3);
+	test(v3_1);
+	test(v3_2);
+	test(v3_3);
+	test(v4_2);
+	test(v5);
+	test(v6);
+	test(v6_1);
+	test(v6_2);
+	test(v6_3);
+
+	test(nested_1);
+	test(nested_2);
+	test(nested_3);
+	test(nested_4);
+	test(nested_5);
+	test(nested_6);
+	test(nested_7);
+	test(nested_8);
+	test(nested_9);
+	test(nested_10);
+	test(nested_11);
+	test(nested_12);
+	test(nested_13);
+	test(nested_14);
+	
+	//C c(v2);
+	//c.Print();
+	//C c(v3);
 }
 
