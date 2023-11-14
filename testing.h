@@ -51,26 +51,32 @@ std::unordered_map<std::string, bool> m{
 	};
 	
 	std::vector<std::string> v3{
+		"a",
+		"b",
+		"c"
+	};
+	
+	std::vector<std::string> v4{
 		"if a",
 			"a1",
 		"endif"
 	};
 
-	std::vector<std::string> v3_1{
+	std::vector<std::string> v5{
 		"b",
 		"if a",
 			"a1",
 		"endif"
 	};
 
-	std::vector<std::string> v3_2{
+	std::vector<std::string> v6{
 		"if a",
 			"a1",
 		"endif",
 		"b"
 	};
 
-	std::vector<std::string> v3_3{
+	std::vector<std::string> v7{
 		"b",
 		"if a",
 			"a1",
@@ -78,7 +84,7 @@ std::unordered_map<std::string, bool> m{
 		"c"
 	};
 	
-	std::vector<std::string> v4{
+	std::vector<std::string> v8{
 		"if a",
 			"a1",
 		"elseif b",
@@ -86,7 +92,7 @@ std::unordered_map<std::string, bool> m{
 		"endif"
 	};
 	
-	std::vector<std::string> v4_1{
+	std::vector<std::string> v9{
 		"c",
 		"if a",
 			"a1",
@@ -95,16 +101,17 @@ std::unordered_map<std::string, bool> m{
 		"endif"
 	};
 	
-	std::vector<std::string> v4_2{
+	std::vector<std::string> v10{
 		"c",
 		"if a",
 			"a1",
 		"elseif b",
 			"b1",
-		"endif"
+		"endif",
+		"d"
 	};
 
-	std::vector<std::string> v5{
+	std::vector<std::string> v11{
 		"if a",
 			"a1",
 		"elseif b",
@@ -114,7 +121,7 @@ std::unordered_map<std::string, bool> m{
 		"endif"
 	};
 		
-	std::vector<std::string> v6{
+	std::vector<std::string> v12{
 		"if a",
 			"a1",
 			"a2",
@@ -130,7 +137,7 @@ std::unordered_map<std::string, bool> m{
 		"endif"
 	};
 	
-	std::vector<std::string> v6_1{
+	std::vector<std::string> v13{
 		"d",
 		"if a",
 			"a1",
@@ -147,7 +154,7 @@ std::unordered_map<std::string, bool> m{
 		"endif"
 	};
 
-	std::vector<std::string> v6_2{
+	std::vector<std::string> v14{
 		"if a",
 			"a1",
 			"a2",
@@ -161,10 +168,11 @@ std::unordered_map<std::string, bool> m{
 			"c2",
 			"c3",
 		"endif",
-		"d"
+		"d",
+		"d1"
 	};
 
-	std::vector<std::string> v6_3{
+	std::vector<std::string> v15{
 		"d1",
 		"if a",
 			"a1",
@@ -209,16 +217,42 @@ std::unordered_map<std::string, bool> m{
 				"b1", 
 				"b2", 
 				"b3", 
-			"elseif bbb",
-					 "bbb1",
-				 	 "bbb2",
-					 "bbb3",
+			"elseif bb",
+					 "bb1",
+				 	 "bb2",
+					 "bb3",
 			"endif",	 
-				"if c", 
-					"c1", 
-					"c2", 
-					"c3", 
-				"endif", 
+			"if c", 
+				"c1", 
+				"c2", 
+				"c3", 
+			"endif", 
+		"endif"
+	};	
+	
+	std::vector<std::string> nested_2_1{
+		"if a", 
+			"a1", 
+			"a2", 
+			"a3", 
+			"if b", 
+				"b1", 
+				"b2", 
+				"b3", 
+			"elseif bb",
+					 "bb1",
+				 	 "if cc",
+					 	"cc1",
+						"cc2",
+					 "endif",
+					 "bb2",
+					 "bb3",
+			"endif",	 
+			"if c", 
+				"c1", 
+				"c2", 
+				"c3", 
+			"endif", 
 		"endif"
 	};	
 	
@@ -227,9 +261,10 @@ std::unordered_map<std::string, bool> m{
 			"if b",
 				"if c",
 					"if d",
-						"d1",
-						"d2",
-						"d3",
+							"d1",
+							"d2",
+							"d3",
+					
 					"elseif dd",
 						    "dd1",
 							"dd2",
@@ -303,18 +338,18 @@ std::unordered_map<std::string, bool> m{
 			"if b",
 				"if c",
 					"if d",
-						"d1",
-						"d2",
-						"d3",
+							"d1",
+							"d2",
+							"d3",
 					"elseif dd",
 						    "dd1",
 							"dd2",
 							"dd3",
 					"endif",
 				"elseif cc",
-				"cc1",
-				"cc2",
-				"cc3",
+					"cc1",
+					"cc2",
+					"cc3",
 				"endif",
 			"endif",
 		"endif"
@@ -416,7 +451,7 @@ std::unordered_map<std::string, bool> m{
 				"endif",
 			"endif",
 		"a1",
-		"endif",
+		"endif"
 	};
 
 	std::vector<std::string> nested_13{

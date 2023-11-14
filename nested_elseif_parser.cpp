@@ -19,6 +19,10 @@ public:
 	virtual Base* Front(){return nullptr;}
 	virtual std::size_t Size() const {return 0;}
 	virtual void SetParent(Base* parent)=0;
+	virtual std::string Name() const=0;
+
+
+	virtual void PopLast(){}
 };
 
 class D1: public Base
@@ -31,10 +35,10 @@ public:
 	
 	virtual ~D1(){}
 	virtual void Print(){std::cout << "\t\tD1::PRINT, " << name_ << '\n';}
-	virtual Base* GetCommand(){/*std::cout << "D1::GETCOMMAND\n";*/ return this;}
+	virtual Base* GetCommand(){return this;}
 	virtual Base* Parent(){return parent_;}
 	bool IsCondition() const {return is_condition_;}
-	std::string Name() const {return name_;}
+	virtual std::string Name() const {return name_;}
 	virtual void SetParent(Base* parent){parent_ = parent;}
 
 private:	
@@ -52,6 +56,8 @@ public:
 	}
 	
 	virtual ~D2(){}
+	virtual std::string Name() const {return name_;}
+	virtual void PopLast(){v_.erase(std::next(std::begin(v_)), std::end(v_));}
 	virtual void Print(){
 		//std::cout << "D2::PRINT BEGIN, " << name_ << "\n";
 		for(auto& u: v_){
@@ -68,7 +74,6 @@ public:
 	
 	virtual Base* GetCommand()
 	{
-		//std::cout << name_ << ", SIZE: " << v_.size() << ", D2::GETCOMMAND\n";
 		return v_.front()->GetCommand();
 	}
 
@@ -79,14 +84,11 @@ public:
 
 	virtual void PopFront()
 	{
-		//std::cout << name_ << ", D2::POPFRONT, " << "размер до pop_front: " << v_.size() << "\n";
 		v_.pop_front();
-		//std::cout << name_ << ", D2::POPFRONT, " << "размер после pop_front: " << v_.size() << "\n";
 		if(v_.empty())
 		{
 			if(parent_)
 			{
-				//std::cout << "if(parent_) parent_->PopFront()\n";
 				parent_->PopFront();
 			}
 		}
@@ -140,7 +142,7 @@ public:
 		{
 			root_->PopFront();
 			last_command_ = nullptr;
-			return true;
+			return result;
 		}
 	
 		if(!last_command_)
@@ -156,11 +158,11 @@ private:
 	
 	bool MoveNext(bool is_condition, bool result)
 	{
-		std::cout << "MOVENEXT(" << std::boolalpha << is_condition << ", " << result << ")\n";
 		if(is_condition)
 		{
 			if(result)
 			{
+				last_command_->Parent()->Parent()->PopLast();
 				last_command_->Parent()->PopFront();
 			}
 			else
@@ -173,7 +175,9 @@ private:
 			if(result)
 			{
 				if(last_command_->Parent()->Size()==1)
-					 last_command_->Parent()->Parent()->Parent()->PopFront();
+				{
+					last_command_->Parent()->Parent()->Parent()->PopFront();
+				}
 				else
 					last_command_->Parent()->PopFront();
 			}
@@ -293,53 +297,89 @@ private:
 void test(const std::vector<std::string>& v)
 {
 	std::unordered_map<std::string, bool> m_2(m);
+	//m_2["a"]=false;
+	//m_2["a1"]=false;
+	//m_2["a2"]=false;
+	//m_2["a3"]=false;
+	//m_2["b"]=false;
+	//m_2["b1"]=false;
+	//m_2["b2"]=false;
+	//m_2["b3"]=false;
+	//m_2["c"]=false;
+	//m_2["c1"]=false;
+	//m_2["c2"]=false;
+	//m_2["c3"]=false;
+	//m_2["d"]=false;
+	//m_2["d1"]=false;
+	//m_2["d2"]=false;
+	//m_2["d3"]=false;
+	
+	//m_2["bb"]=false;
+	//m_2["bb1"]=false;
+	//m_2["bb2"]=false;
+	//m_2["bb3"]=false;
+	
+	//m_2["cc"]=false;
+	//m_2["cc1"]=false;
+	//m_2["cc2"]=false;
+	
+	//m_2["dd"]=false;
+	//m_2["dd1"]=false;
+	//m_2["dd2"]=false;
+	//m_2["dd3"]=false;
+	
 	C c(v);
 	while(!c.AtEnd())
 	{
 		D1* command = c.GetCommand();
-		std::cout << "NAME: " << command->Name() << '\n';
+		std::cout << "NAME: " << command->Name() << '\n'; 
 		bool result = m_2[command->Name()]; 
-		c.Next(result);
+		if(!c.Next(result))
+			break;
 	}	
 }
 
 void simple_test()
 {
-	test(v1);
-	test(v2);
-	test(v3);
-	test(v3_1);
-	test(v3_2);
-	test(v3_3);
-	test(v4_2);
-	test(v5);
-	test(v6);
-	test(v6_1);
-	test(v6_2);
-	test(v6_3);
+	//test(v1);
+	//test(v2);
+	//test(v3);
+	//test(v4);
+	//test(v5);
+	//test(v6);
+	//test(v7);
+	//test(v8);
+	//test(v9);
+	//test(v10);
+	//test(v11);
+	//test(v12);
+	//test(v13);
+	//test(v14);
+	//test(v15);
 }
 
 void nested_test()
 {
-	test(nested_1);
-	test(nested_2);
-	test(nested_3);
-	test(nested_4);
-	test(nested_5);
-	test(nested_6);
-	test(nested_7);
-	test(nested_8);
-	test(nested_9);
-	test(nested_10);
-	test(nested_11);
-	test(nested_12);
-	test(nested_13);
-	test(nested_14);
+	//test(nested_1);
+	//test(nested_2);
+	//test(nested_2_1);
+	//test(nested_3);
+	//test(nested_4);
+	//test(nested_5);
+	//test(nested_6);
+	//test(nested_7);
+	//test(nested_8);
+	//test(nested_9);
+	//test(nested_10);
+	//test(nested_11);
+	//test(nested_12);
+	//test(nested_13);
+	//test(nested_14);
 }
 
 int main()
 {
-	simple_test();
+	//simple_test();
 	nested_test();	
 	//C c(v2);
 	//c.Print();
