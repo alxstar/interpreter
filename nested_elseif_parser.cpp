@@ -303,7 +303,7 @@ void test(const std::vector<std::string>& v)
 	}	
 }
 
-int main()
+void simple_test()
 {
 	test(v1);
 	test(v2);
@@ -317,7 +317,10 @@ int main()
 	test(v6_1);
 	test(v6_2);
 	test(v6_3);
+}
 
+void nested_test()
+{
 	test(nested_1);
 	test(nested_2);
 	test(nested_3);
@@ -332,7 +335,12 @@ int main()
 	test(nested_12);
 	test(nested_13);
 	test(nested_14);
-	
+}
+
+int main()
+{
+	simple_test();
+	nested_test();	
 	//C c(v2);
 	//c.Print();
 	//C c(v3);
