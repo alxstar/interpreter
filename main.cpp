@@ -102,8 +102,14 @@ void nested_test()
 	//test(nested_14);
 }
 
+void else_test(){
+	test(else_1);
+}
+
+
 int main()
 {
-	nested_test();
+	//nested_test();
+	else_test();
 }
 

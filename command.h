@@ -46,7 +46,7 @@ private:
 class Branch: public CommandBase
 {
 public:
-	explicit Branch(const std::string& name); 
+	explicit Branch(const std::string& name=""); 
 	
 	virtual ~Branch(){}
 	virtual std::string Name() const {return name_;}

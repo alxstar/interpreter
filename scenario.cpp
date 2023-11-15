@@ -90,6 +90,18 @@ void TestScenario::HandleIf(const std::string& line)
 	branches_.push(std::move(new_if_branch));
 }
 
+void TestScenario::HandleElse()
+{
+	auto prev_if_or_elseif_branch = std::move(branches_.top());		
+	branches_.pop();
+	if(!branches_.empty())
+	{
+		branches_.top()->Push(std::move(prev_if_or_elseif_branch));
+	}	
+	std::unique_ptr<CommandBase> new_elseif_branch = std::make_unique<Branch>();		  
+	branches_.push(std::move(new_elseif_branch));
+}
+
 void TestScenario::HandleElseif(const std::string& line)
 {
 	auto elseif_pos = line.find("elseif ");
@@ -152,6 +164,7 @@ void TestScenario::Parse(const std::vector<std::string>& v)
 
 		bool if_found = (line.find("if ") != std::string::npos);
 		bool elseif_found = (line.find("elseif ") != std::string::npos);
+		bool else_found = (line.find("else ") != std::string::npos);
 		auto endif_found = (line.find("endif") != std::string::npos);
 		
 		if(if_found && !elseif_found)
@@ -161,6 +174,10 @@ void TestScenario::Parse(const std::vector<std::string>& v)
 		else if(elseif_found)
 		{
 			HandleElseif(line);
+		}
+		else if(else_found)
+		{
+			HandleElse();
 		}
 		else if(endif_found)
 		{

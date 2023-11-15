@@ -590,4 +590,16 @@ std::unordered_map<std::string, bool> m{
 		"a3"
 	};
 
+	std::vector<std::string> else_1{
+		"if a",
+			"a1",
+			"a2",
+			"a3",
+		"else ",
+			"b1",
+			"b2",
+			"b3",
+		"endif"
+	};
+
 #endif

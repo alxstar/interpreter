@@ -22,6 +22,7 @@ private:
 	bool MoveNext(bool is_condition, bool result);
 	void HandleIf(const std::string& line);
 	void HandleElseif(const std::string& line);
+	void HandleElse();
 	void HandleEndif();
 	void HandleInstruction(const std::string& line);
 	void Parse(const std::vector<std::string>& v);
