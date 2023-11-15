@@ -5,71 +5,71 @@
 #include <list>
 #include <string>
 
-class Base
+class CommandBase
 {
 public:
-	virtual ~Base(){}
-	virtual void Push(std::unique_ptr<Base>&& u){}
-	virtual Base* GetCommand()=0;
+	virtual ~CommandBase(){}
+	virtual void Push(std::unique_ptr<CommandBase>&& u){}
+	virtual CommandBase* GetCommand()=0;
 	virtual void PopFront(){}
-	virtual Base* Parent()=0;
+	virtual CommandBase* Parent()=0;
 	virtual bool IsEmpty() const {return true;}
-	virtual Base* Front(){return nullptr;}
+	virtual CommandBase* Front(){return nullptr;}
 	virtual std::size_t Size() const {return 0;}
-	virtual void SetParent(Base* parent)=0;
+	virtual void SetParent(CommandBase* parent)=0;
 	virtual std::string Name() const=0;
 
 	virtual void PopLast(){}
 };
 
-class D1: public Base
+class TestCommand: public CommandBase
 {
 public:
-	explicit D1(const std::string& name, bool is_condition=false): 
+	explicit TestCommand(const std::string& name, bool is_condition=false): 
 		name_(name),
 		is_condition_(is_condition)
 	{} 
 	
-	virtual ~D1(){}
-	virtual Base* GetCommand(){return this;}
-	virtual Base* Parent(){return parent_;}
+	virtual ~TestCommand(){}
+	virtual CommandBase* GetCommand(){return this;}
+	virtual CommandBase* Parent(){return parent_;}
 	bool IsCondition() const {return is_condition_;}
 	virtual std::string Name() const {return name_;}
-	virtual void SetParent(Base* parent){parent_ = parent;}
+	virtual void SetParent(CommandBase* parent){parent_ = parent;}
 
 private:	
 	std::string name_;
-	Base* parent_ = nullptr;
+	CommandBase* parent_ = nullptr;
 	bool is_condition_;
 };
 
-class D2: public Base
+class Branch: public CommandBase
 {
 public:
-	explicit D2(const std::string& name); 
+	explicit Branch(const std::string& name); 
 	
-	virtual ~D2(){}
+	virtual ~Branch(){}
 	virtual std::string Name() const {return name_;}
 	virtual void PopLast(){v_.erase(std::next(std::begin(v_)), std::end(v_));}
 	
-	virtual void Push(std::unique_ptr<Base>&& u);
+	virtual void Push(std::unique_ptr<CommandBase>&& u);
 	
-	virtual Base* GetCommand();
+	virtual CommandBase* GetCommand();
 
-	virtual Base* Front();
+	virtual CommandBase* Front();
 
 	virtual void PopFront();
 
-	virtual Base* Parent(){return parent_;}
+	virtual CommandBase* Parent(){return parent_;}
 	bool IsEmpty() const { return v_.empty();}
 	virtual std::size_t Size() const {return v_.size();}
 
-	virtual void SetParent(Base* parent){parent_ = parent;}
+	virtual void SetParent(CommandBase* parent){parent_ = parent;}
 
 private:
-	std::list<std::unique_ptr<Base>> v_;
+	std::list<std::unique_ptr<CommandBase>> v_;
 	std::string name_;
-	Base* parent_ = nullptr;
+	CommandBase* parent_ = nullptr;
 };
 
 

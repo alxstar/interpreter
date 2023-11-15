@@ -50,10 +50,10 @@ void test(const std::vector<std::string>& v)
 	//m_2["dd2"]=false;
 	//m_2["dd3"]=false;
 	
-	C c(v);
+	TestScenario c(v);
 	while(!c.AtEnd())
 	{
-		D1* command = c.GetCommand();
+		TestCommand* command = c.GetCommand();
 		std::cout << "NAME: " << command->Name() << '\n'; 
 		bool result = m_2[command->Name()]; 
 		if(!c.Next(result))

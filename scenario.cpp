@@ -7,15 +7,15 @@
 #include <string>
 #include <iostream>
 
-C::C(const std::vector<std::string>& v)
+TestScenario::TestScenario(const std::vector<std::string>& v)
 {
-	root_ = std::make_unique<D2>("root");
+	root_ = std::make_unique<Branch>("root");
 	Parse(v);
 }
 
-D1* C::GetCommand()
+TestCommand* TestScenario::GetCommand()
 {
-	auto* command = dynamic_cast<D1*>(root_->Front()->GetCommand());
+	auto* command = dynamic_cast<TestCommand*>(root_->Front()->GetCommand());
 	
 	if(!command)
 		return nullptr;
@@ -24,12 +24,12 @@ D1* C::GetCommand()
 	return command;
 }	
 
-bool C::Next(bool result)
+bool TestScenario::Next(bool result)
 {
 	if(root_->IsEmpty()) 
 		return false;
 
-	if(dynamic_cast<D1*>(root_->Front()))
+	if(dynamic_cast<TestCommand*>(root_->Front()))
 	{
 		root_->PopFront();
 		last_command_ = nullptr;
@@ -43,7 +43,7 @@ bool C::Next(bool result)
 	return MoveNext(is_condition, result);
 }
 
-bool C::MoveNext(bool is_condition, bool result)
+bool TestScenario::MoveNext(bool is_condition, bool result)
 {
 	if(is_condition)
 	{
@@ -76,21 +76,21 @@ bool C::MoveNext(bool is_condition, bool result)
 	return true;
 }
 
-void C::HandleIf(const std::string& line)
+void TestScenario::HandleIf(const std::string& line)
 {
 	auto if_pos = line.find("if ");
 	std::string name = line.substr(if_pos + 3);
 	
-	std::unique_ptr<Base> new_from_if_to_endif_struct = std::make_unique<D2>(std::string("starting with: ") + name);
+	std::unique_ptr<CommandBase> new_from_if_to_endif_struct = std::make_unique<Branch>(std::string("starting with: ") + name);
 	branches_.push(std::move(new_from_if_to_endif_struct));
 			
-	std::unique_ptr<Base> new_if_branch = std::make_unique<D2>(name);	
-	std::unique_ptr<Base> if_condition = std::make_unique<D1>(name, true);
+	std::unique_ptr<CommandBase> new_if_branch = std::make_unique<Branch>(name);	
+	std::unique_ptr<CommandBase> if_condition = std::make_unique<TestCommand>(name, true);
 	new_if_branch->Push(std::move(if_condition));
 	branches_.push(std::move(new_if_branch));
 }
 
-void C::HandleElseif(const std::string& line)
+void TestScenario::HandleElseif(const std::string& line)
 {
 	auto elseif_pos = line.find("elseif ");
 	std::string name = line.substr(elseif_pos + 7);
@@ -101,13 +101,13 @@ void C::HandleElseif(const std::string& line)
 		branches_.top()->Push(std::move(prev_if_or_elseif_branch));
 	}	
 			
-	std::unique_ptr<Base> new_elseif_branch = std::make_unique<D2>(name);		  
-	std::unique_ptr<Base> elseif_condition = std::make_unique<D1>(name, true);
+	std::unique_ptr<CommandBase> new_elseif_branch = std::make_unique<Branch>(name);		  
+	std::unique_ptr<CommandBase> elseif_condition = std::make_unique<TestCommand>(name, true);
 	new_elseif_branch->Push(std::move(elseif_condition));
 	branches_.push(std::move(new_elseif_branch));
 }
 
-void C::HandleEndif()
+void TestScenario::HandleEndif()
 {
 	auto ended_if_or_elseif_branch = std::move(branches_.top());	
 	branches_.pop();
@@ -129,21 +129,21 @@ void C::HandleEndif()
 	}
 }
 
-void C::HandleInstruction(const std::string& line)
+void TestScenario::HandleInstruction(const std::string& line)
 {
 	if(!branches_.empty())
 	{
-		std::unique_ptr<Base> instruction = std::make_unique<D1>(line);
+		std::unique_ptr<CommandBase> instruction = std::make_unique<TestCommand>(line);
 		branches_.top()->Push(std::move(instruction));
 	}
 	else
 	{
-		std::unique_ptr<Base> instruction = std::make_unique<D1>(line);
+		std::unique_ptr<CommandBase> instruction = std::make_unique<TestCommand>(line);
 		root_->Push(std::move(instruction));
 	}
 }
 
-void C::Parse(const std::vector<std::string>& v)
+void TestScenario::Parse(const std::vector<std::string>& v)
 {
 	for(const auto& line: v)
 	{

@@ -9,12 +9,12 @@
 #include <string>
 #include <vector>
 
-class C
+class TestScenario
 {
 public:	
-	explicit C(const std::vector<std::string>& v);
+	explicit TestScenario(const std::vector<std::string>& v);
 	std::size_t Size() const {return root_->Size();}
-	D1* GetCommand();
+	TestCommand* GetCommand();
 	bool Next(bool result);
 	bool AtEnd() const {return root_->IsEmpty();}
 
@@ -27,9 +27,9 @@ private:
 	void Parse(const std::vector<std::string>& v);
 
 private:				
-	std::unique_ptr<Base> root_ = nullptr;
-	std::stack<std::unique_ptr<Base>> branches_;
-	D1* last_command_ = nullptr;
+	std::unique_ptr<CommandBase> root_ = nullptr;
+	std::stack<std::unique_ptr<CommandBase>> branches_;
+	TestCommand* last_command_ = nullptr;
 };
 
 #endif

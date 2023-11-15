@@ -1,27 +1,27 @@
 #include "command.h"
 
-D2::D2(const std::string& name): 
+Branch::Branch(const std::string& name): 
 		name_(name)
 {
 }
 
-void D2::Push(std::unique_ptr<Base>&& u)
+void Branch::Push(std::unique_ptr<CommandBase>&& u)
 {
 	u->SetParent(this);
 	v_.push_back(std::move(u));
 }
 
-Base* D2::GetCommand()
+CommandBase* Branch::GetCommand()
 {
 	return v_.front()->GetCommand();
 }
 
-Base* D2::Front()
+CommandBase* Branch::Front()
 {
 	return v_.empty() ? nullptr : v_.front().get();
 }
 
-void D2::PopFront()
+void Branch::PopFront()
 {
 	v_.pop_front();
 	if(v_.empty())
