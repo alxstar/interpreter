@@ -164,7 +164,7 @@ void TestScenario::Parse(const std::vector<std::string>& v)
 
 		bool if_found = (line.find("if ") != std::string::npos);
 		bool elseif_found = (line.find("elseif ") != std::string::npos);
-		bool else_found = (line.find("else ") != std::string::npos);
+		bool else_found = (line.find("else") != std::string::npos);
 		auto endif_found = (line.find("endif") != std::string::npos);
 		
 		if(if_found && !elseif_found && !endif_found)
@@ -183,7 +183,7 @@ void TestScenario::Parse(const std::vector<std::string>& v)
 		{
 			HandleEndif();
 		}
-		else if(!if_found && !elseif_found && !endif_found)
+		else if(!if_found && !elseif_found && !endif_found && !else_found)
 		{
 			HandleInstruction(line);
 		}
